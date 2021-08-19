@@ -10,16 +10,6 @@ load_dotenv()
 
 bot = Telegrask(os.getenv("API_KEY"))
 
-help_message="""
-/help - display this message
-/flist - list all avaliable foreasts
-/fmap - get forecast map
-/finfo - get forecast description
-"""
-
-@bot.custom_help_command
-def help_command(update: Update, context, descriptions):
-    update.message.reply_text(help_message)
 
 @bot.command("flist", help='list all avaliable foreasts')
 def all_forecasts_command(update: Update, context):
