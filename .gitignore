@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+.vscode/
+.idea/
+*.egg-info/
+dist/
+*.lock
+.env
