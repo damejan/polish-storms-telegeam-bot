@@ -2,7 +2,8 @@ import os
 import io
 import base64
 from telegrask import Telegrask
-from telegram import Update
+from telegram import Update, update
+from telegram.ext import CallbackContext
 import forecasts
 from dotenv import load_dotenv
 
@@ -12,13 +13,13 @@ bot = Telegrask(os.getenv("API_KEY"))
 
 
 @bot.command("flist", help='list all avaliable foreasts')
-def all_forecasts_command(update: Update, context):
+def all_forecasts_command(update: Update, context: CallbackContext):
     res = forecasts.get_all_as_text()
     update.message.reply_text(res)
 
 @bot.command("fmap", help = "get forecast map")
-def forecats_map(update: Update, context):
-    index = get_arg(update.message.text)
+def forecats_map(update: Update, context: CallbackContext):
+    index = get_arg(context.args)
     if index is None:
         update.message.reply_text("invalid command")
         return
@@ -33,8 +34,8 @@ def forecats_map(update: Update, context):
     update.message.reply_photo(photo=image_as_bytes, caption=caption)
 
 @bot.command("finfo", help = "get forecast description")
-def forecast_info(update: Update, context):
-    index = get_arg(update.message.text)
+def forecast_info(update: Update, context: CallbackContext):
+    index = get_arg(context.args)
     if index is None:
         update.message.reply_text("invalid command")
         return
@@ -51,14 +52,13 @@ def forecast_info(update: Update, context):
     update.message.reply_text(info)
 
 
-def get_arg(message: str):
-    arg = message.split(" ")
-    if len(arg) < 2:
+def get_arg(args: list[str]):
+    if len(args) < 1:
         return None
-    if arg[1] == "current":
+    if args[0] == "current":
         return 0
     try:
-        return int(arg[1]) if int(arg[1]) >= 0 else None
+        return int(args[0]) if int(args[0]) >= 0 else None
     except ValueError:
         return None
 
