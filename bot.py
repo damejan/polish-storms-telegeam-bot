@@ -3,7 +3,7 @@ import io
 import base64
 import requests
 from telegrask import Telegrask
-from telegram import Update, update
+from telegram import Update
 from telegram.ext import CallbackContext
 import forecasts
 from dotenv import load_dotenv
@@ -77,7 +77,7 @@ def last_imgw_state(update: Update, context: CallbackContext):
     update.message.reply_photo(photo=image_as_bytes, caption=caption)
 
 
-@bot.command('lightnings', help='get map of lightnings')
+@bot.command('lightnings', help='get lightnings map from obserwatorzy.info')
 def lightnings_map(update: Update, context: CallbackContext):
     res = requests.get("https://obserwatorzy.info/maps/statyczna.jpg", stream=True)
     update.message.reply_photo(photo=res.raw)
