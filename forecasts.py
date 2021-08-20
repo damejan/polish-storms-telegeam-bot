@@ -33,6 +33,11 @@ def get_forecast(index: int):
     response = requests.get(f"{BASE_URL}/forecast/{forecasts['forecast'][index]['validToTimestamp']}").json()
     return response
 
+def get_last_imgw_state():
+    response = get_all()['monitoring']
+    last_state_timestamp = int(response[-1]['validTo'])
+    return requests.get(f"{BASE_URL}/monitoring/{last_state_timestamp}").json()
+
 def get_all_as_text():
     response = get_all()
     message = f"Avaliable Forecasts:\n"

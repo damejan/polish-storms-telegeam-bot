@@ -1,6 +1,7 @@
 import os
 import io
 import base64
+import requests
 from telegrask import Telegrask
 from telegram import Update, update
 from telegram.ext import CallbackContext
@@ -11,6 +12,18 @@ load_dotenv()
 
 bot = Telegrask(os.getenv("API_KEY"))
 
+info_message="""
+useful links:
+live report - https://obserwatorzy.info/
+dynamic map from IMGW - https://meteo.imgw.pl/dyn/
+IMGW warnings - https://meteo.imgw.pl/dyn/?osmet=true
+IMGW forecast - https://meteo.imgw.pl/
+live lightnings map - https://www.lightningmaps.org/ 
+"""
+
+@bot.command("info", help='usefull links')
+def info(update: Update, context: CallbackContext):
+    update.message.reply_text(info_message)
 
 @bot.command("flist", help='list all avaliable foreasts')
 def all_forecasts_command(update: Update, context: CallbackContext):
@@ -51,6 +64,23 @@ def forecast_info(update: Update, context: CallbackContext):
 
     update.message.reply_text(info)
 
+
+@bot.command('laststate', help='last state from IMGW (use "desc" as an argument to get also description)')
+def last_imgw_state(update: Update, context: CallbackContext):
+    last_state = forecasts.get_last_imgw_state()
+    image = last_state['forecast']['forecast']['images']['asPng']['asBase64']
+    image_as_bytes = io.BytesIO(base64.b64decode(image))
+    caption = ''
+    if len(context.args) > 0 and context.args[0] == "desc":
+        caption = last_state['forecast']['forecast']['keys']['ogólnie']
+    
+    update.message.reply_photo(photo=image_as_bytes, caption=caption)
+
+
+@bot.command('lightnings', help='get map of lightnings')
+def lightnings_map(update: Update, context: CallbackContext):
+    res = requests.get("https://obserwatorzy.info/maps/statyczna.jpg", stream=True)
+    update.message.reply_photo(photo=res.raw)
 
 def get_arg(args: list[str]):
     if len(args) < 1:
