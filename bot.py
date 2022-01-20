@@ -28,6 +28,9 @@ def info(update: Update, context: CallbackContext):
 @bot.command("flist", help='list all avaliable foreasts')
 def all_forecasts_command(update: Update, context: CallbackContext):
     res = forecasts.get_all_as_text()
+    if res is None:
+        update.message.reply_text("there are currently no forecasts")
+        return
     update.message.reply_text(res)
 
 @bot.command("fmap", help = "get forecast map")
@@ -68,6 +71,9 @@ def forecast_info(update: Update, context: CallbackContext):
 @bot.command('laststate', help='last state from IMGW (use "desc" as an argument to get also description)')
 def last_imgw_state(update: Update, context: CallbackContext):
     last_state = forecasts.get_last_imgw_state()
+    if last_state is None:
+        update.message.reply_text("there are currently no forecasts")
+        return
     image = last_state['forecast']['forecast']['images']['asPng']['asBase64']
     image_as_bytes = io.BytesIO(base64.b64decode(image))
     caption = ''
@@ -82,7 +88,7 @@ def lightnings_map(update: Update, context: CallbackContext):
     res = requests.get("https://obserwatorzy.info/maps/statyczna.jpg", stream=True)
     update.message.reply_photo(photo=res.raw)
 
-def get_arg(args: list[str]):
+def get_arg(args):
     if len(args) < 1:
         return None
     if args[0] == "current":
