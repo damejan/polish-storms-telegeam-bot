@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 bot = Telegrask(os.getenv("API_KEY"))
+mode = os.getenv("MODE")
 
 info_message="""
 useful links:
@@ -100,4 +101,7 @@ def get_arg(args):
 
 
 if __name__ == "__main__":
-    bot.run(debug=True)
+    if mode == "prod":
+        bot.run(debug=False)
+    else:
+        bot.run(debug=True)
