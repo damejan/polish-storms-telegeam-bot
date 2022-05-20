@@ -38,15 +38,22 @@ def all_forecasts_command(update: Update, context: CallbackContext):
 def forecats_map(update: Update, context: CallbackContext):
     index = get_arg(context.args)
     if index is None:
-        update.message.reply_text("invalid command")
+        update.message.reply_text("invalid command. You should specify number which is index or 'current' as an argument.")
         return
 
     forecast = forecasts.get_forecast(index)
     if forecast is None:
         update.message.reply_text("the forecast for this index doesn't exist")
+        return
 
     image = forecast['forecast']['forecast']['images']['asPng']['asBase64']
-    caption = forecast['forecast']['forecast']['keys']['ogólnie']
+    if "ogólnie" in forecast['forecast']['forecast']['keys']:
+        caption = forecast['forecast']['forecast']['keys']['ogólnie']
+    if "opis" in forecast['forecast']['forecast']['keys']:
+        caption = forecast['forecast']['forecast']['keys']['opis']
+        
+    if len(caption) > 750:
+        caption = "The forecast description is too long for the caption, try /finfo for detailed description" 
     image_as_bytes = io.BytesIO(base64.b64decode(image))
     update.message.reply_photo(photo=image_as_bytes, caption=caption)
 
@@ -54,18 +61,28 @@ def forecats_map(update: Update, context: CallbackContext):
 def forecast_info(update: Update, context: CallbackContext):
     index = get_arg(context.args)
     if index is None:
-        update.message.reply_text("invalid command")
+        update.message.reply_text("invalid command. You should specify number which is index or 'current' as an argument.")
         return
     
     forecast = forecasts.get_forecast(index)
     if forecast is None:
         update.message.reply_text("the forecast for this index doesn't exist")
-
-    info = forecast['forecast']['forecast']['keys']['szczegółowo']
-    if not info:
-        update.message.reply_text("this forecast has no description")
         return
 
+    info = ""
+    if "szczegółowo" not in forecast['forecast']['forecast']['keys'] and "opis" in forecast['forecast']['forecast']['keys']:
+        info = forecast['forecast']['forecast']['keys']['opis']
+        if len(info) > 0:       
+            update.message.reply_text("this forecast has no detailed description. Instead we have general description:")
+            update.message.reply_text(info)
+            return
+    elif "szczegółowo" in forecast['forecast']['forecast']['keys']:
+        if len(info) > 0:
+            info = forecast['forecast']['forecast']['keys']['szczegółowo']
+            update.message.reply_text(info)
+            return
+        
+    info = "This forecast has no description."
     update.message.reply_text(info)
 
 
